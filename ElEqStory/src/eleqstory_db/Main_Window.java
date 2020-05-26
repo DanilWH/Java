@@ -5,6 +5,12 @@
  */
 package eleqstory_db;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import javax.swing.JOptionPane;
+import java.sql.SQLException;
+import java.util.logging.Level;
+
 /**
  *
  * @author danil
@@ -16,6 +22,28 @@ public class Main_Window extends javax.swing.JFrame {
      */
     public Main_Window() {
         initComponents();
+        // call the connection with the database.
+        getConnection();
+    }
+    
+    public Connection getConnection() {
+        // declare the Connection variable and initialize it to null.
+        Connection con = null;
+        
+        try {
+            // get the connection with the local database.
+            con = DriverManager.getConnection("jdbc:mysql://localhost/products_db2", "root", "");
+            // show one window with the "Connected!" label if success.
+            JOptionPane.showMessageDialog(null, "Connected!");
+            // return the status of the connection as a result.
+            return con;
+        } catch (SQLException ex) {
+            java.util.logging.Logger.getLogger(Main_Window.class.getName()).log(Level.SEVERE, null, ex);
+            // show the other window with the "Not connected" label if there was no connection.
+            JOptionPane.showMessageDialog(null, "Not connected!");
+            // return the null value as a result if fail.
+            return null;
+        }
     }
 
     /**
