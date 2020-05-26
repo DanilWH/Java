@@ -45,6 +45,7 @@ public class Main {
 		System.out.println(Cat.getCount());
 		Cat.setCount(987);
 		System.out.println(Cat.getCount());
+		
 	}
 
 }
