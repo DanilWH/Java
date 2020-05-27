@@ -10,12 +10,19 @@ import java.sql.DriverManager;
 import javax.swing.JOptionPane;
 import java.sql.SQLException;
 import java.util.logging.Level;
+import javax.swing.ImageIcon;
+import java.awt.Image;
+import javax.swing.JFileChooser;
+import java.io.File;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author danil
  */
 public class Main_Window extends javax.swing.JFrame {
+    
+    public String imgPath = null;
 
     /**
      * Creates new form Main_Window
@@ -23,10 +30,15 @@ public class Main_Window extends javax.swing.JFrame {
     public Main_Window() {
         initComponents();
         // call the connection with the database.
-        getConnection();
+        // uncomment the line so the database works;
+        // getConnection();
     }
     
+    /*** the own code. ***/
+    
     public Connection getConnection() {
+        /*** gets the connection with the database. ***/
+        
         // declare the Connection variable and initialize it to null.
         Connection con = null;
         
@@ -44,6 +56,31 @@ public class Main_Window extends javax.swing.JFrame {
             // return the null value as a result if fail.
             return null;
         }
+    }
+    
+    public ImageIcon resizeImg(String imagePath, byte[] pic) {
+        /*** gets an image using its path and resizes it for the lbl_image label. ***/
+        
+        // declare the variable that will conteins the original image. But now it's null.
+        ImageIcon myImage = null;
+        
+        // check if we have the path we could get the image with.
+        if (imagePath != null) {
+            // if so, get the image using the path.
+            myImage = new ImageIcon(imagePath);
+        }
+        else {
+            myImage = new ImageIcon(pic);
+        }
+        
+        // resize the image to the lbl_image label size using an instance of the Image class.
+        Image img = myImage.getImage();
+        Image img2 = img.getScaledInstance(lbl_image.getWidth(), lbl_image.getHeight(), Image.SCALE_SMOOTH);
+        
+        // get the new scaled image and store it as an icon.
+        ImageIcon image = new ImageIcon(img2);
+        
+        return image;
     }
 
     /**
@@ -65,11 +102,11 @@ public class Main_Window extends javax.swing.JFrame {
         jTextField2 = new javax.swing.JTextField();
         jTextField3 = new javax.swing.JTextField();
         jTextField4 = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
+        lbl_image = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btn_ChooseImage = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
@@ -110,9 +147,9 @@ public class Main_Window extends javax.swing.JFrame {
         jTextField4.setOpaque(false);
         jTextField4.setPreferredSize(new java.awt.Dimension(15, 50));
 
-        jLabel6.setBackground(new java.awt.Color(230, 230, 230));
-        jLabel6.setForeground(new java.awt.Color(1, 1, 1));
-        jLabel6.setOpaque(true);
+        lbl_image.setBackground(new java.awt.Color(230, 230, 230));
+        lbl_image.setForeground(new java.awt.Color(1, 1, 1));
+        lbl_image.setOpaque(true);
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -130,12 +167,12 @@ public class Main_Window extends javax.swing.JFrame {
         jButton1.setText("Insert");
         jButton1.setIconTextGap(10);
 
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/download-smaller.png"))); // NOI18N
-        jButton2.setText("Choose Image");
-        jButton2.setIconTextGap(10);
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btn_ChooseImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/download-smaller.png"))); // NOI18N
+        btn_ChooseImage.setText("Choose Image");
+        btn_ChooseImage.setIconTextGap(10);
+        btn_ChooseImage.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btn_ChooseImageActionPerformed(evt);
             }
         });
 
@@ -196,8 +233,8 @@ public class Main_Window extends javax.swing.JFrame {
                                 .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btn_ChooseImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lbl_image, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -249,9 +286,9 @@ public class Main_Window extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel5)
-                                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(lbl_image, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(btn_ChooseImage, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -279,12 +316,36 @@ public class Main_Window extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void btn_ChooseImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ChooseImageActionPerformed
+        /*** allows to choose an image using the file chooser and sets the image as an icon into the lbl_image label. ***/
+        
+        // set the primordial directory as user/home.
+        JFileChooser file = new JFileChooser();
+        file.setCurrentDirectory(new File(System.getProperty("user.home")));
+        
+        // allow to use the jpg and png formats only.
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("*.images", "jpg", "png");
+        file.addChoosableFileFilter(filter);
+        
+        // get the result of the user has chosen an image.
+        int result = file.showSaveDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            // if so, get the selected file.
+            File selectedFile = file.getSelectedFile();
+            // get the absolute path of the selected file.
+            String path = selectedFile.getAbsolutePath();
+            // set the image as an icon of the lbl_image.label.
+            lbl_image.setIcon(resizeImg(path, null));;
+        }
+        // if the user has not chosen an image.
+        else {
+            // then we just print the message that says "No File Selected".
+            System.out.println("No File Selected");
+        }
+    }//GEN-LAST:event_btn_ChooseImageActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_jButton6ActionPerformed
 
     /**
@@ -323,8 +384,8 @@ public class Main_Window extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btn_ChooseImage;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
@@ -336,7 +397,6 @@ public class Main_Window extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
@@ -344,5 +404,6 @@ public class Main_Window extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
+    private javax.swing.JLabel lbl_image;
     // End of variables declaration//GEN-END:variables
 }
