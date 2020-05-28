@@ -15,6 +15,9 @@ import java.awt.Image;
 import javax.swing.JFileChooser;
 import java.io.File;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.sql.PreparedStatement;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 /**
  *
@@ -29,9 +32,6 @@ public class Main_Window extends javax.swing.JFrame {
      */
     public Main_Window() {
         initComponents();
-        // call the connection with the database.
-        // uncomment the line so the database works;
-        // getConnection();
     }
     
     /*** the own code. ***/
@@ -45,14 +45,12 @@ public class Main_Window extends javax.swing.JFrame {
         try {
             // get the connection with the local database.
             con = DriverManager.getConnection("jdbc:mysql://localhost/products_db2", "root", "");
-            // show one window with the "Connected!" label if success.
-            JOptionPane.showMessageDialog(null, "Connected!");
             // return the status of the connection as a result.
             return con;
         } catch (SQLException ex) {
             java.util.logging.Logger.getLogger(Main_Window.class.getName()).log(Level.SEVERE, null, ex);
             // show the other window with the "Not connected" label if there was no connection.
-            JOptionPane.showMessageDialog(null, "Not connected!");
+            JOptionPane.showMessageDialog(null, "Not connected!", "Something has gone wrond!", HEIGHT);
             // return the null value as a result if fail.
             return null;
         }
@@ -82,6 +80,24 @@ public class Main_Window extends javax.swing.JFrame {
         
         return image;
     }
+    
+    public boolean checkInputs() {
+        /*** checks if the all fields aren't empty. ***/
+        
+        if (txt_name.getText() == null || txt_price.getText() == null || txt_addDate.getText() == null) {
+            return false;
+        }
+        else {
+            try {
+                // try to convert the price to a float value and return true if success.
+                Float.parseFloat(txt_price.getText());
+                return true;
+            }
+            catch (Exception ex) {
+                return false;
+            }
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -98,14 +114,14 @@ public class Main_Window extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jTextField2 = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
-        jTextField4 = new javax.swing.JTextField();
+        txt_id = new javax.swing.JTextField();
+        txt_name = new javax.swing.JTextField();
+        txt_price = new javax.swing.JTextField();
+        txt_addDate = new javax.swing.JTextField();
         lbl_image = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jButton1 = new javax.swing.JButton();
+        btn_Insert = new javax.swing.JButton();
         btn_ChooseImage = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
@@ -133,19 +149,19 @@ public class Main_Window extends javax.swing.JFrame {
         jLabel5.setForeground(new java.awt.Color(1, 1, 1));
         jLabel5.setText("Image:");
 
-        jTextField1.setBackground(java.awt.Color.white);
-        jTextField1.setOpaque(false);
-        jTextField1.setPreferredSize(new java.awt.Dimension(15, 50));
+        txt_id.setBackground(java.awt.Color.white);
+        txt_id.setOpaque(false);
+        txt_id.setPreferredSize(new java.awt.Dimension(15, 50));
 
-        jTextField2.setOpaque(false);
-        jTextField2.setPreferredSize(new java.awt.Dimension(15, 50));
+        txt_name.setOpaque(false);
+        txt_name.setPreferredSize(new java.awt.Dimension(15, 50));
 
-        jTextField3.setOpaque(false);
-        jTextField3.setPreferredSize(new java.awt.Dimension(15, 50));
+        txt_price.setOpaque(false);
+        txt_price.setPreferredSize(new java.awt.Dimension(15, 50));
 
-        jTextField4.setText("yyyy/MM/dd");
-        jTextField4.setOpaque(false);
-        jTextField4.setPreferredSize(new java.awt.Dimension(15, 50));
+        txt_addDate.setText("yyyy/MM/dd");
+        txt_addDate.setOpaque(false);
+        txt_addDate.setPreferredSize(new java.awt.Dimension(15, 50));
 
         lbl_image.setBackground(new java.awt.Color(230, 230, 230));
         lbl_image.setForeground(new java.awt.Color(1, 1, 1));
@@ -162,10 +178,15 @@ public class Main_Window extends javax.swing.JFrame {
         jTable1.setOpaque(false);
         jScrollPane1.setViewportView(jTable1);
 
-        jButton1.setBackground(new java.awt.Color(193, 193, 193));
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/add-smaller.png"))); // NOI18N
-        jButton1.setText("Insert");
-        jButton1.setIconTextGap(10);
+        btn_Insert.setBackground(new java.awt.Color(193, 193, 193));
+        btn_Insert.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/add-smaller.png"))); // NOI18N
+        btn_Insert.setText("Insert");
+        btn_Insert.setIconTextGap(10);
+        btn_Insert.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_InsertActionPerformed(evt);
+            }
+        });
 
         btn_ChooseImage.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/download-smaller.png"))); // NOI18N
         btn_ChooseImage.setText("Choose Image");
@@ -237,13 +258,13 @@ public class Main_Window extends javax.swing.JFrame {
                             .addComponent(lbl_image, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(txt_id, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txt_name, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txt_price, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txt_addDate, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jButton1)
+                        .addComponent(btn_Insert)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -269,20 +290,20 @@ public class Main_Window extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
-                            .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txt_id, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
-                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txt_name, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3)
-                            .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(txt_price, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(txt_addDate, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel5)
@@ -292,7 +313,7 @@ public class Main_Window extends javax.swing.JFrame {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
+                    .addComponent(btn_Insert)
                     .addComponent(jButton3)
                     .addComponent(jButton4)
                     .addComponent(jButton5)
@@ -333,7 +354,7 @@ public class Main_Window extends javax.swing.JFrame {
             // if so, get the selected file.
             File selectedFile = file.getSelectedFile();
             // get the absolute path of the selected file.
-            String path = selectedFile.getAbsolutePath();
+            String path = imgPath = selectedFile.getAbsolutePath();
             // set the image as an icon of the lbl_image.label.
             lbl_image.setIcon(resizeImg(path, null));;
         }
@@ -343,10 +364,46 @@ public class Main_Window extends javax.swing.JFrame {
             System.out.println("No File Selected");
         }
     }//GEN-LAST:event_btn_ChooseImageActionPerformed
-
+    
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-
+        System.out.println("btn_Previous");
     }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void btn_InsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_InsertActionPerformed
+        /*** processes a query for data sending. ***/
+        
+        if (checkInputs() && imgPath != null) {
+            try {
+                Connection con = getConnection();
+                
+                String query = "INSERT INTO products (name, price, add_date, image) VALUES (?, ?, ?, ?)";
+                PreparedStatement ps = con.prepareStatement(query);
+                
+                // set the name.
+                ps.setString(1, txt_name.getText());
+                // set the price.
+                ps.setString(2, txt_price.getText());
+                // set the added date.
+                ps.setString(3, txt_addDate.getText());
+                
+                // get a stream of the image and set it into the database.
+                InputStream img = new FileInputStream(new File(imgPath));
+                ps.setBlob(4, img);
+                
+                // execute the query.
+                ps.executeUpdate();
+                
+                // show a success message.
+                JOptionPane.showMessageDialog(null, "The data has been successfully added!");
+            }
+            catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage());
+            }
+        }
+        else {
+            JOptionPane.showMessageDialog(null, "One or more fields are empty!");
+        }
+    }//GEN-LAST:event_btn_InsertActionPerformed
 
     /**
      * @param args the command line arguments
@@ -385,7 +442,7 @@ public class Main_Window extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_ChooseImage;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btn_Insert;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
@@ -400,10 +457,10 @@ public class Main_Window extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
-    private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
     private javax.swing.JLabel lbl_image;
+    private javax.swing.JTextField txt_addDate;
+    private javax.swing.JTextField txt_id;
+    private javax.swing.JTextField txt_name;
+    private javax.swing.JTextField txt_price;
     // End of variables declaration//GEN-END:variables
 }
