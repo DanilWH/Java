@@ -18,6 +18,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.sql.PreparedStatement;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 /**
  *
@@ -37,27 +38,25 @@ public class Main_Window extends javax.swing.JFrame {
     /*** the own code. ***/
     
     public Connection getConnection() {
-        /*** gets the connection with the database. ***/
+        /*** Returns the Connection object or null if there is no connection with the database. ***/
         
         // declare the Connection variable and initialize it to null.
         Connection con = null;
-        
         try {
             // get the connection with the local database.
             con = DriverManager.getConnection("jdbc:mysql://localhost/products_db2", "root", "");
-            // return the status of the connection as a result.
-            return con;
         } catch (SQLException ex) {
             java.util.logging.Logger.getLogger(Main_Window.class.getName()).log(Level.SEVERE, null, ex);
             // show the other window with the "Not connected" label if there was no connection.
             JOptionPane.showMessageDialog(null, "Not connected!", "Something has gone wrond!", HEIGHT);
-            // return the null value as a result if fail.
-            return null;
+        } finally {
+            // return the status of the connection as a result.
+            return con;
         }
     }
     
     public ImageIcon resizeImg(String imagePath, byte[] pic) {
-        /*** gets an image using its path and resizes it for the lbl_image label. ***/
+        /*** gets an image using its path and returns the resized copy of the image for the lbl_image label. ***/
         
         // declare the variable that will conteins the original image. But now it's null.
         ImageIcon myImage = null;
@@ -123,7 +122,7 @@ public class Main_Window extends javax.swing.JFrame {
         jTable1 = new javax.swing.JTable();
         btn_Insert = new javax.swing.JButton();
         btn_ChooseImage = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        btn_Update = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
@@ -165,6 +164,9 @@ public class Main_Window extends javax.swing.JFrame {
 
         lbl_image.setBackground(new java.awt.Color(230, 230, 230));
         lbl_image.setForeground(new java.awt.Color(1, 1, 1));
+        lbl_image.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lbl_image.setText("No image yet");
+        lbl_image.setToolTipText("");
         lbl_image.setOpaque(true);
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
@@ -197,10 +199,15 @@ public class Main_Window extends javax.swing.JFrame {
             }
         });
 
-        jButton3.setBackground(new java.awt.Color(193, 193, 193));
-        jButton3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/reload-smaller.png"))); // NOI18N
-        jButton3.setText("Refresh");
-        jButton3.setIconTextGap(10);
+        btn_Update.setBackground(new java.awt.Color(193, 193, 193));
+        btn_Update.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/reload-smaller.png"))); // NOI18N
+        btn_Update.setText("Update");
+        btn_Update.setIconTextGap(10);
+        btn_Update.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_UpdateActionPerformed(evt);
+            }
+        });
 
         jButton4.setBackground(new java.awt.Color(193, 193, 193));
         jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/criss-cross-smaller.png"))); // NOI18N
@@ -254,7 +261,7 @@ public class Main_Window extends javax.swing.JFrame {
                                 .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btn_ChooseImage, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btn_ChooseImage, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
                             .addComponent(lbl_image, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -266,9 +273,9 @@ public class Main_Window extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(btn_Insert)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton3)
+                        .addComponent(btn_Update)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton4)))
+                        .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGap(40, 40, 40)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -314,7 +321,7 @@ public class Main_Window extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_Insert)
-                    .addComponent(jButton3)
+                    .addComponent(btn_Update)
                     .addComponent(jButton4)
                     .addComponent(jButton5)
                     .addComponent(jButton6)
@@ -355,8 +362,10 @@ public class Main_Window extends javax.swing.JFrame {
             File selectedFile = file.getSelectedFile();
             // get the absolute path of the selected file.
             String path = imgPath = selectedFile.getAbsolutePath();
+            // clear the label text.
+            lbl_image.setText("");
             // set the image as an icon of the lbl_image.label.
-            lbl_image.setIcon(resizeImg(path, null));;
+            lbl_image.setIcon(resizeImg(path, null));
         }
         // if the user has not chosen an image.
         else {
@@ -370,40 +379,78 @@ public class Main_Window extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void btn_InsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_InsertActionPerformed
-        /*** processes a query for data sending. ***/
+        /*** processes a query for data sending. 
+         * At first, we try to get all connections, streams, etc. and only then
+         * we process all the rest operations for the query.
+         * The following pattern of nested try-catch-finally statements allows us
+         * to keep track of each connection or stream we try to get.
+        ***/
         
         if (checkInputs() && imgPath != null) {
+            
+            // get a connection with the database.
+            Connection con = getConnection();
+            
             try {
-                Connection con = getConnection();
-                
+                // prepare the statement.
                 String query = "INSERT INTO products (name, price, add_date, image) VALUES (?, ?, ?, ?)";
                 PreparedStatement ps = con.prepareStatement(query);
                 
-                // set the name.
-                ps.setString(1, txt_name.getText());
-                // set the price.
-                ps.setString(2, txt_price.getText());
-                // set the added date.
-                ps.setString(3, txt_addDate.getText());
+                try {
+                    // get a stream of the image and set it into the database.
+                    InputStream img = new FileInputStream(new File(imgPath));
+                    
+                    try {
+                        /* process the query.*/
+                        
+                        // set the name.
+                        ps.setString(1, txt_name.getText());
+                        // set the price.
+                        ps.setString(2, txt_price.getText());
+                        // set the added date.
+                        ps.setString(3, txt_addDate.getText());
+                        // set the image.
+                        ps.setBlob(4, img);
                 
-                // get a stream of the image and set it into the database.
-                InputStream img = new FileInputStream(new File(imgPath));
-                ps.setBlob(4, img);
+                        // execute the query.
+                        ps.executeUpdate();
                 
-                // execute the query.
-                ps.executeUpdate();
-                
-                // show a success message.
-                JOptionPane.showMessageDialog(null, "The data has been successfully added!");
+                        // show a success message.
+                        JOptionPane.showMessageDialog(null, "The data has been successfully added!");
+                        
+                    } catch (Exception ex) {
+                        // catch any exception of the query process.
+                        JOptionPane.showMessageDialog(null, ex);
+                    } finally {
+                        // close the stream of img.
+                        try {img.close();} catch (Exception ex) {}
+                    }
+                    
+                } catch (Exception ex) {
+                    // catch an exception of getting the image stream.
+                    JOptionPane.showMessageDialog(null, ex);
+                } finally {
+                    // close the connection of the prepared statement.
+                    try {ps.close();} catch (SQLException ex) {}
+                }
             }
             catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, ex.getMessage());
+                // catch exception of the prepared statement connection.
+                JOptionPane.showMessageDialog(null, ex);
+            }
+            finally {
+                // close the connection.
+                try {con.close();} catch (SQLException ex) {}
             }
         }
         else {
             JOptionPane.showMessageDialog(null, "One or more fields are empty!");
         }
     }//GEN-LAST:event_btn_InsertActionPerformed
+
+    private void btn_UpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_UpdateActionPerformed
+        /*** The Update button work implementation. ***/
+    }//GEN-LAST:event_btn_UpdateActionPerformed
 
     /**
      * @param args the command line arguments
@@ -443,7 +490,7 @@ public class Main_Window extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_ChooseImage;
     private javax.swing.JButton btn_Insert;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton btn_Update;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
