@@ -40,11 +40,15 @@ public class Main_Window extends javax.swing.JFrame {
     public Connection getConnection() {
         /*** Returns the Connection object or null if there is no connection with the database. ***/
         
+        // the data for getting the database connection.
+        String url = "jdbc:mysql://localhost/products_db2";
+        String username = "root";
+        String password = "";
         // declare the Connection variable and initialize it to null.
         Connection con = null;
         try {
             // get the connection with the local database.
-            con = DriverManager.getConnection("jdbc:mysql://localhost/products_db2", "root", "");
+            con = DriverManager.getConnection(url, username, password);
         } catch (SQLException ex) {
             java.util.logging.Logger.getLogger(Main_Window.class.getName()).log(Level.SEVERE, null, ex);
             // show the other window with the "Not connected" label if there was no connection.
@@ -81,9 +85,9 @@ public class Main_Window extends javax.swing.JFrame {
     }
     
     public boolean checkInputs() {
-        /*** checks if the all fields aren't empty. ***/
+        /*** checks if the all fields aren't empty. ***/    
         
-        if (txt_name.getText() == null || txt_price.getText() == null || txt_addDate.getText() == null) {
+        if (txt_name.getText().isEmpty() || txt_price.getText().isEmpty() || txt_addDate.getText().isEmpty()) {
             return false;
         }
         else {
@@ -128,6 +132,7 @@ public class Main_Window extends javax.swing.JFrame {
         jButton6 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         jButton8 = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -241,6 +246,9 @@ public class Main_Window extends javax.swing.JFrame {
         jButton8.setText("Last");
         jButton8.setIconTextGap(10);
 
+        jLabel6.setForeground(new java.awt.Color(1, 1, 1));
+        jLabel6.setText("$");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -267,8 +275,11 @@ public class Main_Window extends javax.swing.JFrame {
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txt_id, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(txt_name, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txt_price, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txt_addDate, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(txt_addDate, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(txt_price, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel6)))
                                 .addGap(0, 0, Short.MAX_VALUE))))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(btn_Insert)
@@ -305,7 +316,9 @@ public class Main_Window extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3)
-                            .addComponent(txt_price, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(txt_price, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel6)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel4)
@@ -378,13 +391,15 @@ public class Main_Window extends javax.swing.JFrame {
         System.out.println("btn_Previous");
     }//GEN-LAST:event_jButton6ActionPerformed
 
-    private void btn_InsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_InsertActionPerformed
-        /*** processes a query for data sending. 
+    private boolean processQuery(String query) {
+        /*** processes a query to the database. 
          * At first, we try to get all connections, streams, etc. and only then
          * we process all the rest operations for the query.
          * The following pattern of nested try-catch-finally statements allows us
          * to keep track of each connection or stream we try to get.
         ***/
+        
+        boolean success = false;
         
         if (checkInputs() && imgPath != null) {
             
@@ -392,8 +407,6 @@ public class Main_Window extends javax.swing.JFrame {
             Connection con = getConnection();
             
             try {
-                // prepare the statement.
-                String query = "INSERT INTO products (name, price, add_date, image) VALUES (?, ?, ?, ?)";
                 PreparedStatement ps = con.prepareStatement(query);
                 
                 try {
@@ -415,12 +428,8 @@ public class Main_Window extends javax.swing.JFrame {
                         // execute the query.
                         ps.executeUpdate();
                 
-                        // show a success message.
-                        JOptionPane.showMessageDialog(null, "The data has been successfully added!");
+                        success = true;
                         
-                    } catch (Exception ex) {
-                        // catch any exception of the query process.
-                        JOptionPane.showMessageDialog(null, ex);
                     } finally {
                         // close the stream of img.
                         try {img.close();} catch (Exception ex) {}
@@ -440,16 +449,44 @@ public class Main_Window extends javax.swing.JFrame {
             }
             finally {
                 // close the connection.
-                try {con.close();} catch (SQLException ex) {}
+                try {con.close();} finally {return success;}
             }
         }
         else {
             JOptionPane.showMessageDialog(null, "One or more fields are empty!");
         }
+        
+        return success;
+    }
+    
+    private void btn_InsertActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_InsertActionPerformed
+        // prepare the statement.
+        String query = "INSERT INTO products (name, price, add_date, image) VALUES (?, ?, ?, ?)";
+        boolean success = this.processQuery(query);
+        if (success) JOptionPane.showMessageDialog(null, "The data has been successfully added!");
     }//GEN-LAST:event_btn_InsertActionPerformed
 
     private void btn_UpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_UpdateActionPerformed
         /*** The Update button work implementation. ***/
+        String id = txt_id.getText();
+        
+        if (id.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "The field \"ID\" must not be empty!");
+            return;
+        }
+        else {
+            try {
+                Integer.parseInt(id);
+            }
+            catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Enter the correct ID!");
+                return;
+            }
+        }
+        
+        String query = "UPDATE products SET name = ?, price = ?, add_date = ?, image = ? WHERE id = " + id;
+        boolean success = this.processQuery(query);
+        if (success) JOptionPane.showMessageDialog(null, "The data has been successfully updated!");
     }//GEN-LAST:event_btn_UpdateActionPerformed
 
     /**
@@ -501,6 +538,7 @@ public class Main_Window extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
