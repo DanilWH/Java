@@ -101,7 +101,7 @@ public class Main_Window extends javax.swing.JFrame {
             }
         }
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -127,7 +127,7 @@ public class Main_Window extends javax.swing.JFrame {
         btn_Insert = new javax.swing.JButton();
         btn_ChooseImage = new javax.swing.JButton();
         btn_Update = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        btn_Remove = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
@@ -214,10 +214,15 @@ public class Main_Window extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setBackground(new java.awt.Color(193, 193, 193));
-        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/criss-cross-smaller.png"))); // NOI18N
-        jButton4.setText("Remove");
-        jButton4.setIconTextGap(10);
+        btn_Remove.setBackground(new java.awt.Color(193, 193, 193));
+        btn_Remove.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/criss-cross-smaller.png"))); // NOI18N
+        btn_Remove.setText("Remove");
+        btn_Remove.setIconTextGap(10);
+        btn_Remove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_RemoveActionPerformed(evt);
+            }
+        });
 
         jButton5.setBackground(new java.awt.Color(193, 193, 193));
         jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/left-arrow.png"))); // NOI18N
@@ -286,7 +291,7 @@ public class Main_Window extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btn_Update)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(btn_Remove, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGap(40, 40, 40)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
@@ -335,7 +340,7 @@ public class Main_Window extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_Insert)
                     .addComponent(btn_Update)
-                    .addComponent(jButton4)
+                    .addComponent(btn_Remove)
                     .addComponent(jButton5)
                     .addComponent(jButton6)
                     .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -430,15 +435,17 @@ public class Main_Window extends javax.swing.JFrame {
                 
                         success = true;
                         
-                    } finally {
+                    }
+                    finally {
                         // close the stream of img.
                         try {img.close();} catch (Exception ex) {}
                     }
-                    
-                } catch (Exception ex) {
+                }
+                catch (Exception ex) {
                     // catch an exception of getting the image stream.
                     JOptionPane.showMessageDialog(null, ex);
-                } finally {
+                }
+                finally {
                     // close the connection of the prepared statement.
                     try {ps.close();} catch (SQLException ex) {}
                 }
@@ -468,27 +475,74 @@ public class Main_Window extends javax.swing.JFrame {
 
     private void btn_UpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_UpdateActionPerformed
         /*** The Update button work implementation. ***/
-        String id = txt_id.getText();
         
-        if (id.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "The field \"ID\" must not be empty!");
-            return;
-        }
-        else {
-            try {
-                Integer.parseInt(id);
-            }
-            catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Enter the correct ID!");
-                return;
-            }
-        }
+        if (!isIDCorrect()) return;
+        
+        String id = txt_id.getText();
         
         String query = "UPDATE products SET name = ?, price = ?, add_date = ?, image = ? WHERE id = " + id;
         boolean success = this.processQuery(query);
         if (success) JOptionPane.showMessageDialog(null, "The data has been successfully updated!");
     }//GEN-LAST:event_btn_UpdateActionPerformed
 
+    private void btn_RemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_RemoveActionPerformed
+        /*** Removes an entry from the database, if any. ***/
+        
+        // check the correctness of the "ID" field.
+        if (!isIDCorrect()) return;
+        String id = txt_id.getText();
+        
+        // get a connection with the database.
+        Connection con = getConnection();
+        
+        try {
+            String query = "DELETE FROM products WHERE id = ?";
+            PreparedStatement ps = con.prepareStatement(query);
+            
+            try {
+                // the the id.
+                ps.setInt(1, Integer.parseInt(id));
+                // execute the query.
+                ps.executeUpdate();
+                
+                // confirm success.
+                JOptionPane.showMessageDialog(null, "The entry with id = " + id + " has been successfully removed.");
+            }
+            finally {
+                // close the statement.
+                try {ps.close();} catch (Exception ex) {}
+            }
+        }
+        catch (Exception ex) {
+            // catch exception of the prepared statement connection.
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        finally {
+            // close the database connection.
+            try {con.close();} catch (SQLException ex) {}
+        }
+    }//GEN-LAST:event_btn_RemoveActionPerformed
+    
+    private boolean isIDCorrect() {
+        /*** checks if the id is correct. ***/
+        
+        String id = txt_id.getText();
+        
+        if (id.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "The field \"ID\" must not be empty!");
+            return false;
+        }
+        else {
+            try {
+                Integer.parseInt(id);
+                return true;
+            }
+            catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Enter the correct ID!");
+                return false;
+            }
+        }
+    }
     /**
      * @param args the command line arguments
      */
@@ -527,8 +581,8 @@ public class Main_Window extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btn_ChooseImage;
     private javax.swing.JButton btn_Insert;
+    private javax.swing.JButton btn_Remove;
     private javax.swing.JButton btn_Update;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
