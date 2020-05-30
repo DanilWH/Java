@@ -16,9 +16,13 @@ import javax.swing.JFileChooser;
 import java.io.File;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.ResultSet;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.logging.Logger;
+import java.util.ArrayList;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -33,11 +37,13 @@ public class Main_Window extends javax.swing.JFrame {
      */
     public Main_Window() {
         initComponents();
+        // show data in the jtable.
+        showProductsList();
     }
     
     /*** the own code. ***/
     
-    public Connection getConnection() {
+    private Connection getConnection() {
         /*** Returns the Connection object or null if there is no connection with the database. ***/
         
         // the data for getting the database connection.
@@ -59,7 +65,7 @@ public class Main_Window extends javax.swing.JFrame {
         }
     }
     
-    public ImageIcon resizeImg(String imagePath, byte[] pic) {
+    private ImageIcon resizeImg(String imagePath, byte[] pic) {
         /*** gets an image using its path and returns the resized copy of the image for the lbl_image label. ***/
         
         // declare the variable that will conteins the original image. But now it's null.
@@ -84,7 +90,7 @@ public class Main_Window extends javax.swing.JFrame {
         return image;
     }
     
-    public boolean checkInputs() {
+    private boolean checkInputs() {
         /*** checks if the all fields aren't empty. ***/    
         
         if (txt_name.getText().isEmpty() || txt_price.getText().isEmpty() || txt_addDate.getText().isEmpty()) {
@@ -123,7 +129,7 @@ public class Main_Window extends javax.swing.JFrame {
         txt_addDate = new javax.swing.JTextField();
         lbl_image = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        table_Products = new javax.swing.JTable();
         btn_Insert = new javax.swing.JButton();
         btn_ChooseImage = new javax.swing.JButton();
         btn_Update = new javax.swing.JButton();
@@ -174,7 +180,7 @@ public class Main_Window extends javax.swing.JFrame {
         lbl_image.setToolTipText("");
         lbl_image.setOpaque(true);
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        table_Products.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -182,8 +188,8 @@ public class Main_Window extends javax.swing.JFrame {
                 "ID", "Name", "Price", "Add Date"
             }
         ));
-        jTable1.setOpaque(false);
-        jScrollPane1.setViewportView(jTable1);
+        table_Products.setOpaque(false);
+        jScrollPane1.setViewportView(table_Products);
 
         btn_Insert.setBackground(new java.awt.Color(193, 193, 193));
         btn_Insert.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/scaled/add-smaller.png"))); // NOI18N
@@ -432,6 +438,9 @@ public class Main_Window extends javax.swing.JFrame {
                 
                         // execute the query.
                         ps.executeUpdate();
+                        
+                        // show the jtable with the new row.
+                        showProductsList();
                 
                         success = true;
                         
@@ -482,6 +491,9 @@ public class Main_Window extends javax.swing.JFrame {
         
         String query = "UPDATE products SET name = ?, price = ?, add_date = ?, image = ? WHERE id = " + id;
         boolean success = this.processQuery(query);
+        // show the changes in the jtable.
+        showProductsList();
+        // confirm success.
         if (success) JOptionPane.showMessageDialog(null, "The data has been successfully updated!");
     }//GEN-LAST:event_btn_UpdateActionPerformed
 
@@ -504,6 +516,9 @@ public class Main_Window extends javax.swing.JFrame {
                 ps.setInt(1, Integer.parseInt(id));
                 // execute the query.
                 ps.executeUpdate();
+                
+                // show the changes in the jtable.
+                showProductsList();
                 
                 // confirm success.
                 JOptionPane.showMessageDialog(null, "The entry with id = " + id + " has been successfully removed.");
@@ -543,6 +558,74 @@ public class Main_Window extends javax.swing.JFrame {
             }
         }
     }
+    
+    private ArrayList<Product> getProductsList() {
+        /*** gets the table of products from the database, stores an instance
+         * of each row in an ArrayList and returns the ArrayList.
+        ***/
+        
+        // create an ArrayList that is going to keep products from the database.
+        ArrayList<Product> productsList = new ArrayList<Product>();
+        
+        // get the database connection.
+        Connection con = getConnection();
+        
+        try {
+            // use the Statement object just to get data from the database.
+            Statement st = con.createStatement();
+            
+            try {
+                // execute the following query and store the result in a ResultSet instance.
+                String query = "SELECT * FROM products";
+                ResultSet rs = st.executeQuery(query);
+                
+                // go through the ResultSet instance.
+                while (rs.next()) {
+                    // store each row of the result set as a Product instance.
+                    Product product = new Product(rs.getInt("id"), rs.getString("name"),
+                            Float.parseFloat(rs.getString("price")), rs.getString("add_date"),
+                            rs.getBytes("image"));
+                    // add the instance of each row into the created ArrayList.
+                    productsList.add(product);
+                }
+            }
+            finally {
+                // close the statement.
+                try {st.close();} catch (SQLException ex) {}
+            }
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Some problems have appeared.");
+        }
+        finally {
+            // close the database connection.
+            try {con.close();} catch (SQLException ex) {}
+        }
+        
+        return productsList;
+    }
+    
+    private void showProductsList() {
+        // get the ArrayList of products from the database.
+        ArrayList<Product> productsList = getProductsList();
+        // create a model of the table we will populate the data in.
+        DefaultTableModel model = (DefaultTableModel) table_Products.getModel();
+        // clear the jtable before we fill it.
+        model.setRowCount(0);
+        
+        Object[] row = new Object[4];
+        // go through the ArrayList of products and add its each element
+        // to the model of the table as an array of Objects.
+        for (int i = 0; i < productsList.size(); i++) {
+            row[0] = productsList.get(i).getId();
+            row[1] = productsList.get(i).getName();
+            row[2] = productsList.get(i).getPrice();
+            row[3] = productsList.get(i).getAddDate();
+            
+            model.addRow(row);
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -595,8 +678,8 @@ public class Main_Window extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JLabel lbl_image;
+    private javax.swing.JTable table_Products;
     private javax.swing.JTextField txt_addDate;
     private javax.swing.JTextField txt_id;
     private javax.swing.JTextField txt_name;
