@@ -39,6 +39,7 @@ public class Main_Window extends javax.swing.JFrame {
         initComponents();
         // show data in the jtable.
         showProductsList();
+        System.out.println(Integer.toString(345));
     }
     
     /*** the own code. ***/
@@ -189,6 +190,11 @@ public class Main_Window extends javax.swing.JFrame {
             }
         ));
         table_Products.setOpaque(false);
+        table_Products.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                table_ProductsMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(table_Products);
 
         btn_Insert.setBackground(new java.awt.Color(193, 193, 193));
@@ -537,6 +543,27 @@ public class Main_Window extends javax.swing.JFrame {
             try {con.close();} catch (SQLException ex) {}
         }
     }//GEN-LAST:event_btn_RemoveActionPerformed
+        
+    private void showItem(int index) {
+        /*** fills the fields with an item information depending on the parameter "index". ***/
+        
+        // get the ArrayList of products.
+        Product prItem = getProductsList().get(index);
+        
+        // set the fields with the indexed item information.
+        txt_id.setText(Integer.toString(prItem.getId()));
+        txt_name.setText(prItem.getName());
+        txt_price.setText(Float.toString(prItem.getPrice()));
+        txt_addDate.setText(prItem.getAddDate());
+        // clear the "image" label before set a new image.
+        lbl_image.setText("");
+        lbl_image.setIcon(resizeImg(null, prItem.getImage()));
+    }
+    
+    private void table_ProductsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_table_ProductsMouseClicked
+        int index = table_Products.getSelectedRow();
+        this.showItem(index);
+    }//GEN-LAST:event_table_ProductsMouseClicked
     
     private boolean isIDCorrect() {
         /*** checks if the id is correct. ***/
@@ -606,6 +633,8 @@ public class Main_Window extends javax.swing.JFrame {
     }
     
     private void showProductsList() {
+        /*** The behavior of the function follows from the function name. ***/
+        
         // get the ArrayList of products from the database.
         ArrayList<Product> productsList = getProductsList();
         // create a model of the table we will populate the data in.
