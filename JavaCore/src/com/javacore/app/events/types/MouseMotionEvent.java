@@ -5,7 +5,7 @@ import com.javacore.app.events.Event;
 public class MouseMotionEvent extends Event {
 	
 	private int x, y;
-	private boolean dragged;
+	public boolean dragged;
 
 	public MouseMotionEvent(int x, int y, boolean dragged) {
 		super(Event.Type.MOUSE_MOVED);

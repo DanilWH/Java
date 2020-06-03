@@ -28,6 +28,7 @@ public class Window extends Canvas{
 	private List<Layer> layers = new ArrayList<Layer>();
 	
 	public Window(String name, int width, int height) {
+		// set the window size.
 		setPreferredSize(new Dimension(width, height));
 		// initialize the window.
 		init(name);
@@ -39,7 +40,7 @@ public class Window extends Canvas{
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				MousePressedEvent event = new MousePressedEvent(e.getButton(), e.getX(), getY());
+				MousePressedEvent event = new MousePressedEvent(e.getButton(), e.getX(), e.getY());
 				onEvent(event);
 			}
 			
@@ -71,12 +72,14 @@ public class Window extends Canvas{
 	}
 	
 	public void init(String name) {
+		// create the window.
 		frame = new JFrame(name);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.add(this);
 		frame.pack();
 		// locate the window in the center of the screen.
 		frame.setLocationRelativeTo(null);
+		// the window won't be resizable.
 		frame.setResizable(false);
 		frame.setVisible(true);
 	}
@@ -116,38 +119,20 @@ public class Window extends Canvas{
 	}
 	
 	private void onRender(Graphics g) {
+		/*** Renders layers from the first created layer to the latest created layer. ***/
 		for (int i = 0; i < layers.size(); i++)
 			layers.get(i).onRender(g);
 	}
 	
 	private void onEvent(Event event) {
-		for (int i = layers.size() - 1; i >= 0; i--)
+		/*** Processes layers events from the latest created layer to the first created layer. ***/
+		for (int i = layers.size() - 1; i >= 0; i--) {
 			layers.get(i).onEvent(event);
+		}
 	}
 	
 	public void addLayer(Layer layer) {
+		/*** Adds one layer to the canvas. ***/
 		layers.add(layer);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -4,7 +4,7 @@ public class Event {
 	public enum Type {
 		MOUSE_MOVED,
 		MOUSE_PRESSED,
-		MOUSE_REALEASED,
+		MOUSE_RELEASED,
 	}
 	
 	private Type type;
@@ -18,24 +18,3 @@ public class Event {
 		return type;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

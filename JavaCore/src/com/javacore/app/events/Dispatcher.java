@@ -9,10 +9,10 @@ public class Dispatcher {
 	}
 	
 	public void dispatch(Event.Type type, EventHandler handler) {
-		if (event.handled)
+		if (this.event.handled)
 			return;
 		
-		if (event.getType() == type)
-			handler.handle(event);
+		if (this.event.getType() == type)
+			this.event.handled = handler.handle(this.event);
 	}
 }
