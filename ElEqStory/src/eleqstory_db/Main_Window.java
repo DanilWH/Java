@@ -172,6 +172,11 @@ public class Main_Window extends javax.swing.JFrame {
         btn_Operations.setText("Operations");
         btn_Operations.setMaximumSize(new java.awt.Dimension(100, 32));
         btn_Operations.setMinimumSize(new java.awt.Dimension(100, 32));
+        btn_Operations.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_OperationsActionPerformed(evt);
+            }
+        });
         JPanel_Basics.add(btn_Operations);
 
         btn_Reports.setText("Reports");
@@ -190,6 +195,11 @@ public class Main_Window extends javax.swing.JFrame {
         JPanel_Operations.setLayout(new java.awt.GridLayout(12, 0));
 
         btn_Products.setText("Products");
+        btn_Products.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_ProductsActionPerformed(evt);
+            }
+        });
         JPanel_Operations.add(btn_Products);
 
         btn_Members.setText("Members");
@@ -199,6 +209,11 @@ public class Main_Window extends javax.swing.JFrame {
         JPanel_Operations.add(btn_SalesRecords);
 
         btn_Back.setText("<- Back");
+        btn_Back.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_BackActionPerformed(evt);
+            }
+        });
         JPanel_Operations.add(btn_Back);
 
         JPanel_sideBar.add(JPanel_Operations, "card3");
@@ -651,6 +666,27 @@ public class Main_Window extends javax.swing.JFrame {
         /*** Refreshes the table of data. ***/
         this.showProductsList();
     }//GEN-LAST:event_btn_RefreshTableActionPerformed
+
+    private void btn_OperationsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_OperationsActionPerformed
+        JPanel_sideBar.removeAll();
+        JPanel_sideBar.add(JPanel_Operations);
+        JPanel_sideBar.repaint();
+        JPanel_sideBar.revalidate();
+    }//GEN-LAST:event_btn_OperationsActionPerformed
+
+    private void btn_BackActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_BackActionPerformed
+        JPanel_sideBar.removeAll();
+        JPanel_sideBar.add(JPanel_Basics);
+        JPanel_sideBar.repaint();
+        JPanel_sideBar.revalidate();
+    }//GEN-LAST:event_btn_BackActionPerformed
+
+    private void btn_ProductsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_ProductsActionPerformed
+        JPanel_RightPanel.removeAll();
+        JPanel_RightPanel.add(JPanel_Products);
+        JPanel_RightPanel.repaint();
+        JPanel_RightPanel.revalidate();
+    }//GEN-LAST:event_btn_ProductsActionPerformed
     
     private boolean processQuery(String query) {
         /*** processes a query to the database. 

@@ -85,6 +85,9 @@
                       <Dimension value="[100, 32]"/>
                     </Property>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btn_OperationsActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JButton" name="btn_Reports">
                   <Properties>
@@ -131,6 +134,9 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Products"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btn_ProductsActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JButton" name="btn_Members">
                   <Properties>
@@ -146,6 +152,9 @@
                   <Properties>
                     <Property name="text" type="java.lang.String" value="&lt;- Back"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btn_BackActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>
